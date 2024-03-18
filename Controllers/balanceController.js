@@ -17,21 +17,19 @@ exports.addBalance = (req, res) => {
         if (data[0]) {
             res.status(200).json({
                 status: 1, // balance1
-                message: "balance added successfully"
+                message: "balance added successfully",
+                data: req.body.balance
             });
         } else {
             res.status(500).json({
                 status: 0,
-                message: "something went wrong"
+                message: "failed to add balance"
             });
         }
     }).catch((error) => {
+
         console.log(error);
-        res.status(500).json({
-            status: 0,
-            message: "failed to update user",
-            data: error
-        });
+
 
     });
 }
@@ -55,16 +53,11 @@ exports.withdrawBalance = (req, res) => {
         } else {
             res.status(500).json({
                 status: 0,
-                message: "something went wrong"
+                message: "Failed to withdraw Balance "
             });
         }
     }).catch((error) => {
-        // console.log(error);
-        res.status(500).json({
-            status: 0,
-            message: "failed to update user",
-            data: error
-        });
+        console.log(error);
 
     });
 }
@@ -81,7 +74,7 @@ exports.checkBalance = (req, res) => {
         if (user) {
             res.status(200).json({
                 status: 1,
-                message: "balance",
+                message: "User balance",
                 data: user.balance
             })
 

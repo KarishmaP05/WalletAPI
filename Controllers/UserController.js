@@ -18,9 +18,9 @@ exports.createUser = (req, res) => {
             }
         }).then((user) => {
             if (user) {
-                res.status(200).json({
+                res.status(400).json({
                     status: 0,
-                    message: "user already Registered"
+                    message: "user already Registered with this email."
                 });
             } else {
                 User.create({
@@ -31,7 +31,7 @@ exports.createUser = (req, res) => {
                 }).then((response) => {
                     res.status(200).json({
                         status: 1,
-                        message: "User has been Registered Successfully "
+                        message: "User has been Registered Successfully !"
                     });
 
                 }).catch((error) => {
@@ -80,7 +80,7 @@ exports.loginUser = (req, res) => {
 
                 res.status(200).json({
                     status: 1,
-                    message: "user logged in successfully",
+                    message: "user logged in successfully !",
                     token: userToken
 
                 });
@@ -96,7 +96,7 @@ exports.loginUser = (req, res) => {
 
         } else {
             // we dont have user
-            res.status(500).json({
+            res.status(501).json({
                 status: 0,
                 message: "user not exist with this email address"
 
