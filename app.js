@@ -23,6 +23,7 @@ db.sequelize.sync()
     });
 
 // simple route
+
 app.use('/', userRoute)
 app.use('/', balanceRoute)
 

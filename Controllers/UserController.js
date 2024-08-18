@@ -10,6 +10,7 @@ exports.createUser = (req, res) => {
         let Name = req.body.name;
         let Email = req.body.email;
         let Password = bcrypt.hashSync(req.body.password, 10);
+        let MobileNo = req.body.mobileno;
 
         // if user already registered then.....
         User.findOne({
@@ -26,7 +27,8 @@ exports.createUser = (req, res) => {
                 User.create({
                     name: Name,
                     email: Email,
-                    password: Password
+                    password: Password,
+                    mobileno: MobileNo
 
                 }).then((response) => {
                     res.status(200).json({
@@ -112,3 +114,8 @@ exports.loginUser = (req, res) => {
 
 
 };
+
+
+exports.contact = (req, res) => {
+
+}

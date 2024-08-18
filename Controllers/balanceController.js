@@ -8,62 +8,97 @@ const Transaction = require("../models").Transaction
 
 exports.addBalance = (req, res) => {
     User.update({
-        balance: sequelize.literal('balance +' + req.body.balance)
-    }, {
-        where: {
-            id: req.user.id
-        }
-    }).then((data) => {
-        if (data[0]) {
-            res.status(200).json({
-                status: 1, // balance1
-                message: "balance added successfully",
-                data: req.body.balance
-            });
-        } else {
+            balance: sequelize.literal('balance +' + req.body.balance)
+        }, {
+            where: {
+                id: req.user.id
+            }
+        })
+        .then((data) => {
+            if (data[0]) {
+                // Fetch the updated user balance
+                return User.findOne({
+                    where: { id: req.user.id },
+                    attributes: ['balance']
+                });
+            } else {
+                res.status(500).json({
+                    status: 0,
+                    message: "Failed to add balance"
+                });
+                return null;
+            }
+        })
+        .then((updatedUser) => {
+            if (updatedUser) {
+                const totalBalance = updatedUser.balance;
+                console.log("Total Balance:", totalBalance);
+                res.status(200).json({
+                    status: 1,
+                    message: "Balance added successfully",
+                    data: req.body.balance,
+                    TotalBalance: totalBalance
+                });
+            }
+        })
+        .catch((error) => {
+            console.log(error);
             res.status(500).json({
                 status: 0,
-                message: "failed to add balance"
+                message: "An error occurred while adding balance",
+                error: error.message
             });
-        }
-    }).catch((error) => {
-
-        console.log(error);
-
-
-    });
+        });
 }
-
 
 // withdraw money from account
 
 exports.withdrawBalance = (req, res) => {
     User.update({
-        balance: sequelize.literal('balance -' + req.body.balance)
-    }, {
-        where: {
-            id: req.user.id
-        }
-    }).then((data) => {
-        if (data[0]) {
-            res.status(200).json({
-                status: 1, // balance1
-                message: "balance withdraw successfully"
-            });
-        } else {
+            balance: sequelize.literal('balance -' + req.body.balance)
+        }, {
+            where: {
+                id: req.user.id
+            }
+        })
+        .then((data) => {
+            if (data[0]) {
+                // Fetch the updated user balance
+                return User.findOne({
+                    where: { id: req.user.id },
+                    attributes: ['balance']
+                });
+            } else {
+                res.status(500).json({
+                    status: 0,
+                    message: "Failed to withdraw balance"
+                });
+                return null;
+            }
+        })
+        .then((updatedUser) => {
+            if (updatedUser) {
+                const totalBalance = updatedUser.balance;
+                console.log("Total Balance:", totalBalance);
+                res.status(200).json({
+                    status: 1,
+                    message: "Balance Withdraw successfully",
+                    data: req.body.balance,
+                    TotalBalance: totalBalance
+                });
+            }
+        })
+        .catch((error) => {
+            console.log(error);
             res.status(500).json({
                 status: 0,
-                message: "Failed to withdraw Balance "
+                message: "An error occurred while Withdraw balance",
+                error: error.message
             });
-        }
-    }).catch((error) => {
-        console.log(error);
-
-    });
+        });
 }
 
-
-// check balance 
+// check balance
 
 exports.checkBalance = (req, res) => {
     User.findOne({
@@ -105,7 +140,7 @@ exports.checkBalance = (req, res) => {
 // transfer money
 
 exports.transferBalance = (req, res) => {
-    let To = req.body.to;
+    let MobileNo = req.body.mobileno;
     let Amount = req.body.amount;
     let Reason = req.body.reason;
 
@@ -121,14 +156,15 @@ exports.transferBalance = (req, res) => {
             // sufficient balance
             User.findOne({
                 where: {
-                    id: req.body.to // to
+                    mobileno: req.body.mobileno // to
                 }
             }).then((user) => {
                 if (user) {
+                    console.log("receiver id is", user.id);
                     Transaction.create({
                         date: Date.now(),
                         sender: req.user.id,
-                        receiver: To,
+                        receiver: user.id,
                         amount: Amount,
                         reason: Reason
                     }).then((newTransaction) => {
@@ -147,7 +183,7 @@ exports.transferBalance = (req, res) => {
                                 balance: sequelize.literal('balance +' + Amount)
                             }, {
                                 where: {
-                                    id: To
+                                    mobileno: MobileNo
                                 }
                             }).then((user) => {
                                 if (user[0]) {
@@ -157,11 +193,24 @@ exports.transferBalance = (req, res) => {
                                         where: {
                                             id: newTransactionId
                                         }
-
-                                    }).then((transactionStatus) => {
-                                        if (transactionStatus[0]) {
+                                    }).then((data) => {
+                                        console.log("data is", data);
+                                        if (data[0]) {
+                                            // Fetch the updated user balance
+                                            return User.findOne({
+                                                where: { id: req.user.id },
+                                                attributes: ['balance']
+                                            });
+                                        }
+                                    }).then((updatedUser) => {
+                                        console.log("updatedUser", updatedUser)
+                                        if (updatedUser) {
+                                            const totalBalance = updatedUser.balance;
+                                            console.log("Total Balance:", totalBalance);
                                             res.status(200).json({
-                                                message: "Transaction Successful"
+                                                message: `Transaction Successful of Rs ${Amount}`,
+                                                DebitedAmount: Amount,
+                                                TotalBalance: totalBalance
                                             })
                                         } else {
                                             res.status(400).json({
@@ -222,8 +271,9 @@ exports.transactionHistory = (req, res) => {
         console.log(allTransactions);
         if (allTransactions.length > 0) {
             res.status(200).json({
+                TotalNumberOfTransactions: allTransactions.length,
                 message: "All Transactions Found",
-                data: allTransactions,
+                data: allTransactions
             });
 
         } else {
@@ -233,7 +283,6 @@ exports.transactionHistory = (req, res) => {
 
 
         }
-
     }).catch((error) => {
         res.status(500).json({
             status: 0,
