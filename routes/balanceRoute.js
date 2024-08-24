@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.post("/addBalance", checkToken, addBalance)
 router.post("/withdrawBalance", checkToken, withdrawBalance)
-router.get("/checkBalance", checkToken, checkBalance)
+router.post("/checkBalance", checkToken, checkBalance)
 router.post("/transferBalance", checkToken, transferBalance)
 router.get("/transactionHistory", checkToken, transactionHistory)
 

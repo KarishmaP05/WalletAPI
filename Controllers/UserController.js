@@ -39,7 +39,7 @@ exports.createUser = (req, res) => {
                 }).catch((error) => {
                     res.status(500).json({
                         status: 0,
-                        data: error
+                        message: error.errors ? error.errors[0].message : "An unknown error occurred"
                     });
                 });
             }
@@ -79,10 +79,17 @@ exports.loginUser = (req, res) => {
                         id: user.id
                     }
                 })
+                let email = user.email;
+                let name = user.name;
+                console.log("email", email);
+                console.log("name", name);
+
 
                 res.status(200).json({
                     status: 1,
                     message: "user logged in successfully !",
+                    UserName: name,
+                    UserEmail: email,
                     token: userToken
 
                 });

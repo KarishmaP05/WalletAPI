@@ -36,7 +36,7 @@ exports.addBalance = (req, res) => {
                 res.status(200).json({
                     status: 1,
                     message: "Balance added successfully",
-                    data: req.body.balance,
+                    CreditedAmount: req.body.balance,
                     TotalBalance: totalBalance
                 });
             }
@@ -83,7 +83,7 @@ exports.withdrawBalance = (req, res) => {
                 res.status(200).json({
                     status: 1,
                     message: "Balance Withdraw successfully",
-                    data: req.body.balance,
+                    debitedAmount: req.body.balance,
                     TotalBalance: totalBalance
                 });
             }
@@ -103,14 +103,14 @@ exports.withdrawBalance = (req, res) => {
 exports.checkBalance = (req, res) => {
     User.findOne({
         where: {
-            id: req.user.id
+            mobileno: req.body.mobileno
         }
     }).then((user) => {
         if (user) {
             res.status(200).json({
                 status: 1,
                 message: "User balance",
-                data: user.balance
+                TotalBalance: user.balance
             })
 
         } else {
@@ -273,7 +273,7 @@ exports.transactionHistory = (req, res) => {
             res.status(200).json({
                 TotalNumberOfTransactions: allTransactions.length,
                 message: "All Transactions Found",
-                data: allTransactions
+                Transactions: allTransactions
             });
 
         } else {
