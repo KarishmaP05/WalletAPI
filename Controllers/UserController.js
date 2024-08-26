@@ -6,7 +6,6 @@ const { sequelize } = require("../models");
 
 
 exports.createUser = (req, res) => {
-
         let Name = req.body.name;
         let Email = req.body.email;
         let Password = bcrypt.hashSync(req.body.password, 10);
@@ -52,6 +51,77 @@ exports.createUser = (req, res) => {
     // Login User
 
 exports.loginUser = (req, res) => {
+    User.findOne({
+        where: {
+            email: req.body.email
+        }
+    }).then((user) => {
+        if (user) {
+            if (bcrypt.compareSync(req.body.password, user.password)) {
+
+                let userToken = JWT.sign({
+                    email: user.email,
+                    id: user.id
+                }, JWTConfig.secret, {
+                    expiresIn: JWTConfig.expiresIn, // configuration
+                    notBefore: JWTConfig.notBefore,
+                    audience: JWTConfig.audience,
+                    issuer: JWTConfig.issuer,
+                    algorithm: JWTConfig.algorithm
+
+                });
+                User.update({ logincount: sequelize.literal('logincount + 1') }, { where: { id: user.id } }) // to increment logincount
+                User.update({
+                    lastlogin: Date.now()
+                }, {
+                    where: {
+                        id: user.id
+                    }
+                })
+                let email = user.email;
+                let name = user.name;
+                console.log("email", email);
+                console.log("name", name);
+
+
+                res.status(200).json({
+                    status: 1,
+                    message: "user logged in successfully !",
+                    UserName: name,
+                    UserEmail: email,
+                    token: userToken
+
+                });
+
+
+
+            } else {
+                res.status(500).json({
+                    status: 0,
+                    message: "password didnt match"
+                });
+            }
+
+        } else {
+            // we dont have user
+            res.status(501).json({
+                status: 0,
+                message: "user not exist with this email address"
+
+
+            });
+        }
+    }).catch((error) => {
+        console.log(error);
+
+    })
+
+
+
+
+};
+
+exports.profile = (req, res) => {
     User.findOne({
         where: {
             email: req.body.email

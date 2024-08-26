@@ -9,7 +9,8 @@ const router = express.Router();
 // Create User 
 router.post("/signup", createUser)
 router.post("/login", loginUser)
-router.post("/contact", contact)
+router.post("/profile", [profile])
+
 
 
 
