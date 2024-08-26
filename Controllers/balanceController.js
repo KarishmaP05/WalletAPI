@@ -6,50 +6,127 @@ const Transaction = require("../models").Transaction
 
 // add balance in account
 
-exports.addBalance = (req, res) => {
-    User.update({
+// exports.addBalance = (req, res) => {
+//     // Fetch the user's current balance before updating
+//     User.findOne({
+//             where: { id: req.user.id },
+//             attributes: ['balance']
+//         })
+//         .then((user) => {
+//             if (!user) {
+//                 res.status(404).json({
+//                     status: 0,
+//                     message: "User not found"
+//                 });
+//                 return null;
+//             }
+
+//             const previousBalance = user.balance;
+
+//             // Update the user's balance
+//             return User.update({
+//                     balance: sequelize.literal('balance +' + req.body.balance)
+//                 }, {
+//                     where: {
+//                         id: req.user.id
+//                     }
+//                 })
+//                 .then((data) => {
+//                     if (data[0]) {
+//                         // Fetch the updated user balance
+//                         return User.findOne({
+//                             where: { id: req.user.id },
+//                             attributes: ['balance']
+//                         }).then((updatedUser) => {
+//                             if (updatedUser) {
+//                                 const totalBalance = updatedUser.balance;
+//                                 res.status(200).json({
+//                                     status: 1,
+//                                     message: "Balance added successfully",
+//                                     CreditedAmount: req.body.balance,
+//                                     PreviousBalance: previousBalance,
+//                                     TotalBalance: totalBalance
+//                                 });
+//                             }
+//                         });
+//                     } else {
+//                         res.status(500).json({
+//                             status: 0,
+//                             message: "Failed to add balance"
+//                         });
+//                         return null;
+//                     }
+//                 });
+//         })
+//         .catch((error) => {
+//             console.log(error);
+//             res.status(500).json({
+//                 status: 0,
+//                 message: "An error occurred while adding balance",
+//                 error: error.message
+//             });
+//         });
+// };
+
+exports.addBalance = async(req, res) => {
+    try {
+        // Fetch the user's current balance before updating
+        const user = await User.findOne({
+            where: { id: req.user.id },
+            attributes: ['balance']
+        });
+
+        if (!user) {
+            return res.status(404).json({
+                status: 0,
+                message: "User not found"
+            });
+        }
+
+        const previousBalance = user.balance;
+
+        // Update the user's balance
+        const [updated] = await User.update({
             balance: sequelize.literal('balance +' + req.body.balance)
         }, {
             where: {
                 id: req.user.id
             }
-        })
-        .then((data) => {
-            if (data[0]) {
-                // Fetch the updated user balance
-                return User.findOne({
-                    where: { id: req.user.id },
-                    attributes: ['balance']
-                });
-            } else {
-                res.status(500).json({
-                    status: 0,
-                    message: "Failed to add balance"
-                });
-                return null;
-            }
-        })
-        .then((updatedUser) => {
-            if (updatedUser) {
-                const totalBalance = updatedUser.balance;
-                console.log("Total Balance:", totalBalance);
-                res.status(200).json({
-                    status: 1,
-                    message: "Balance added successfully",
-                    CreditedAmount: req.body.balance,
-                    TotalBalance: totalBalance
-                });
-            }
-        })
-        .catch((error) => {
-            console.log(error);
+        });
+
+        if (updated) {
+            // Fetch the updated user balance
+            const updatedUser = await User.findOne({
+                where: { id: req.user.id },
+                attributes: ['balance']
+            });
+
+            const totalBalance = updatedUser.balance;
+
+            res.status(200).json({
+                status: 1,
+                message: "Balance added successfully",
+                CreditedAmount: req.body.balance,
+                PreviousBalance: previousBalance,
+                TotalBalance: totalBalance
+            });
+        } else {
             res.status(500).json({
                 status: 0,
-                message: "An error occurred while adding balance",
-                error: error.message
+                message: "Failed to add balance"
             });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            status: 0,
+            message: "An error occurred while adding balance",
+            error: error.message
         });
+    }
 }
+
+
 
 // withdraw money from account
 
@@ -89,8 +166,7 @@ exports.withdrawBalance = (req, res) => {
             }
         })
         .catch((error) => {
-            console.log(error);
-            res.status(500).json({
+            res.status(501).json({
                 status: 0,
                 message: "An error occurred while Withdraw balance",
                 error: error.message
@@ -103,7 +179,7 @@ exports.withdrawBalance = (req, res) => {
 exports.checkBalance = (req, res) => {
     User.findOne({
         where: {
-            mobileno: req.body.mobileno
+            id: req.user.id
         }
     }).then((user) => {
         if (user) {
@@ -120,11 +196,8 @@ exports.checkBalance = (req, res) => {
             })
 
         }
-
-
-
     }).catch((error) => {
-        res.status(500).json({
+        res.status(501).json({
             status: 0,
             message: "failed to check balance",
             data: error
