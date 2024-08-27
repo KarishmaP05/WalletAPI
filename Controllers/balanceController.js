@@ -218,13 +218,14 @@ exports.transferBalance = (req, res) => {
     let Reason = req.body.reason;
 
     let newTransactionId;
+    let senderMobileNo, receiverMobileNo
 
     User.findOne({
         where: {
             id: req.user.id
         }
     }).then((user) => {
-        console.log(user);
+        senderMobileNo = user.mobileno;
         if (user.balance >= Amount) {
             // sufficient balance
             User.findOne({
@@ -232,12 +233,12 @@ exports.transferBalance = (req, res) => {
                     mobileno: req.body.mobileno // to
                 }
             }).then((user) => {
+                receiverMobileNo = user.mobileno;
                 if (user) {
-                    console.log("receiver id is", user.id);
                     Transaction.create({
                         date: Date.now(),
-                        sender: req.user.id,
-                        receiver: user.id,
+                        sender: senderMobileNo,
+                        receiver: receiverMobileNo,
                         amount: Amount,
                         reason: Reason
                     }).then((newTransaction) => {

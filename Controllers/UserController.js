@@ -124,62 +124,80 @@ exports.loginUser = (req, res) => {
 exports.profile = (req, res) => {
     User.findOne({
         where: {
-            email: req.body.email
+            id: req.user.id
         }
     }).then((user) => {
+        console.log("user", user);
+
         if (user) {
-            if (bcrypt.compareSync(req.body.password, user.password)) {
-
-                let userToken = JWT.sign({
-                    email: user.email,
-                    id: user.id
-                }, JWTConfig.secret, {
-                    expiresIn: JWTConfig.expiresIn, // configuration
-                    notBefore: JWTConfig.notBefore,
-                    audience: JWTConfig.audience,
-                    issuer: JWTConfig.issuer,
-                    algorithm: JWTConfig.algorithm
-
-                });
-                User.update({ logincount: sequelize.literal('logincount + 1') }, { where: { id: user.id } }) // to increment logincount
-                User.update({
-                    lastlogin: Date.now()
-                }, {
-                    where: {
-                        id: user.id
-                    }
-                })
-                let email = user.email;
-                let name = user.name;
-                console.log("email", email);
-                console.log("name", name);
-
-
-                res.status(200).json({
-                    status: 1,
-                    message: "user logged in successfully !",
-                    UserName: name,
-                    UserEmail: email,
-                    token: userToken
-
-                });
-
-
-
-            } else {
-                res.status(500).json({
-                    status: 0,
-                    message: "password didnt match"
-                });
-            }
-
+            res.status(200).json({
+                message: "Users data Found",
+                UserData: user
+            });
         } else {
             // we dont have user
             res.status(501).json({
                 status: 0,
-                message: "user not exist with this email address"
+                message: "user not exist or Token is not Valid"
 
 
+            });
+        }
+    }).catch((error) => {
+        console.log(error);
+
+    })
+
+
+
+
+};
+
+
+exports.editprofile = (req, res) => {
+    let MobileNo = req.body.mobileno
+    let Name = req.body.name;
+    let Email = req.body.email
+    User.findOne({
+        where: {
+            id: req.user.id
+        }
+    }).then((user) => {
+        if (user) {
+            User.update({
+                name: Name,
+                email: Email,
+                mobileno: MobileNo
+            }, {
+                where: {
+                    id: req.user.id
+                }
+            }).then((rowsUpdated) => {
+                if (rowsUpdated[0] > 0) {
+                    User.findOne({
+                        where: {
+                            id: req.user.id
+                        }
+                    }).then((updatedUser) => {
+                        res.status(200).json({
+                            status: 1,
+                            message: "User Updated Successfully",
+                            UserData: updatedUser // print updated user data here
+                        });
+                    });
+                } else {
+                    res.status(400).json({
+                        status: 0,
+                        message: "Failed to Update User",
+                    })
+
+                }
+            })
+        } else {
+            // we dont have user
+            res.status(501).json({
+                status: 0,
+                message: "user not exist or Token is not Valid"
             });
         }
     }).catch((error) => {
