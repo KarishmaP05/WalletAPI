@@ -184,8 +184,6 @@ exports.withdrawBalance = (req, res) => {
                     error: error.message
                 });
             });
-
-
     })
 }
 
