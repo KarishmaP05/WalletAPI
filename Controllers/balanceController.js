@@ -213,13 +213,19 @@ exports.checkBalance = (req, res) => {
 // transfer money
 
 exports.transferBalance = (req, res) => {
-    let MobileNo = req.body.mobileno;
-    let Amount = req.body.amount;
+    let MobileNo = req.body.mobileno
+    let Amount = req.body.amount == null ? 0 : req.body.amount;
     let Reason = req.body.reason;
 
     let newTransactionId;
     let senderMobileNo, receiverMobileNo
 
+    if (!MobileNo) {
+        return res.status(405).json({
+            status: 0,
+            message: "Mobile Number not found"
+        })
+    }
     User.findOne({
         where: {
             id: req.user.id
@@ -295,42 +301,33 @@ exports.transferBalance = (req, res) => {
                                         }
                                     })
                                 } else {
-                                    res.status(400).json({
+                                    res.status(401).json({
                                         message: "failed to credit balance"
                                     })
 
                                 }
-
-
                             })
                         } else {
-                            res.status(400).json({
+                            res.status(402).json({
                                 message: "failed to deduct balance"
                             })
                         }
-
                     })
-
                 } else {
-                    res.status(404).json({
+                    res.status(403).json({
                         status: 0,
                         message: "receiver not found"
                     })
                 }
-
-
             })
-
         } else {
             res.status(500).json({
                 status: 0,
                 message: "Insufficient Balance",
                 data: user.balance
             })
-
         }
     })
-
 }
 
 
