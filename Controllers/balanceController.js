@@ -137,7 +137,7 @@ exports.withdrawBalance = (req, res) => {
             id: req.user.id
         }
     }).then((user) => {
-        if (!user.balance >= balance) {
+        if (user.balance < balance) {
             return res.status(502).json({
                 status: 0,
                 message: "Insufficient Balance"
