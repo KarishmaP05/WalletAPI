@@ -131,47 +131,62 @@ exports.addBalance = async(req, res) => {
 // withdraw money from account
 
 exports.withdrawBalance = (req, res) => {
-    User.update({
-            balance: sequelize.literal('balance -' + req.body.balance)
-        }, {
-            where: {
-                id: req.user.id
-            }
-        })
-        .then((data) => {
-            if (data[0]) {
-                // Fetch the updated user balance
-                return User.findOne({
-                    where: { id: req.user.id },
-                    attributes: ['balance']
-                });
-            } else {
-                res.status(500).json({
-                    status: 0,
-                    message: "Failed to withdraw balance"
-                });
-                return null;
-            }
-        })
-        .then((updatedUser) => {
-            if (updatedUser) {
-                const totalBalance = updatedUser.balance;
-                console.log("Total Balance:", totalBalance);
-                res.status(200).json({
-                    status: 1,
-                    message: "Balance Withdraw successfully",
-                    debitedAmount: req.body.balance,
-                    TotalBalance: totalBalance
-                });
-            }
-        })
-        .catch((error) => {
-            res.status(501).json({
+    let balance = req.body.balance;
+    User.findOne({
+        where: {
+            id: req.user.id
+        }
+    }).then((user) => {
+        if (!user.balance >= balance) {
+            return res.status(502).json({
                 status: 0,
-                message: "An error occurred while Withdraw balance",
-                error: error.message
+                message: "Insufficient Balance"
             });
-        });
+        }
+        User.update({
+                balance: sequelize.literal('balance -' + req.body.balance)
+            }, {
+                where: {
+                    id: req.user.id
+                }
+            })
+            .then((data) => {
+                if (data[0]) {
+                    // Fetch the updated user balance
+                    return User.findOne({
+                        where: { id: req.user.id },
+                        attributes: ['balance']
+                    });
+                } else {
+                    res.status(500).json({
+                        status: 0,
+                        message: "Failed to withdraw balance"
+                    });
+                    return null;
+                }
+            })
+            .then((updatedUser) => {
+                if (updatedUser) {
+                    const totalBalance = updatedUser.balance;
+                    console.log("Total Balance:", totalBalance);
+                    res.status(200).json({
+                        status: 1,
+                        message: "Balance Withdraw successfully",
+                        debitedAmount: req.body.balance,
+                        TotalBalance: totalBalance
+                    });
+                }
+            })
+            .catch((error) => {
+                res.status(501).json({
+                    status: 0,
+                    message: "An error occurred while Withdraw balance",
+                    error: error.message
+                });
+            });
+
+
+    })
 }
 
 // check balance
