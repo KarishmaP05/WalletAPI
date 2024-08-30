@@ -61,7 +61,8 @@ exports.loginUser = (req, res) => {
 
                 let userToken = JWT.sign({
                     email: user.email,
-                    id: user.id
+                    id: user.id,
+                    name: user.name
                 }, JWTConfig.secret, {
                     expiresIn: JWTConfig.expiresIn, // configuration
                     notBefore: JWTConfig.notBefore,
@@ -87,10 +88,9 @@ exports.loginUser = (req, res) => {
                 res.status(200).json({
                     status: 1,
                     message: "user logged in successfully !",
-                    UserName: name,
-                    UserEmail: email,
+                    // UserName: name,
+                    // UserEmail: email,
                     token: userToken
-
                 });
 
 
@@ -204,9 +204,6 @@ exports.editprofile = (req, res) => {
         console.log(error);
 
     })
-
-
-
 
 };
 

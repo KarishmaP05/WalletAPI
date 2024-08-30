@@ -237,8 +237,10 @@ exports.transferBalance = (req, res) => {
                 if (user) {
                     Transaction.create({
                         date: Date.now(),
-                        sender: senderMobileNo,
-                        receiver: receiverMobileNo,
+                        sender: req.user.id,
+                        receiver: user.id,
+                        senderMobile: senderMobileNo,
+                        receiverMobile: receiverMobileNo,
                         amount: Amount,
                         reason: Reason
                     }).then((newTransaction) => {

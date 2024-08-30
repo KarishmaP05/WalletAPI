@@ -21,6 +21,15 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.INTEGER,
             allowNull: false
         },
+        senderMobile: {
+            type: Sequelize.INTEGER,
+            allowNull: false,
+        },
+        receiverMobile: {
+            type: Sequelize.INTEGER,
+            allowNull: false
+        },
+
         amount: {
             type: Sequelize.INTEGER,
             allowNull: false
